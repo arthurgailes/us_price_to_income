@@ -1,0 +1,139 @@
+---
+title: "Statewide rents-to-income ratio map"
+author: "Arthur Gailes"
+date: "`r Sys.Date()`"
+format:
+  html:
+    code-fold: true
+    echo: false
+    warning: false
+    message: false
+    page-layout: full
+editor_options:
+  chunk_output_type: console
+editor:
+  render-on-save: true
+---
+
+Project Description: A statewide map comparing the median home price in every jurisdiction to metropolitan household income. Generally, three to five is considered to be a healthy rate---this interactive map will reveal potentially exclusionary jurisdictions.
+
+
+```{r setup}
+#| include: false
+pacman::p_load(sf, dplyr, leaflet, leafpop, here, mapgl)
+setwd(here())
+knitr::opts_knit$set(root.dir = here())
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+```
+
+```{r}
+map_data <- st_read("data/tidy/map_data_income_avm.geojson", quiet = TRUE) |>
+  rename_with( ~gsub("\\.", " ", .x), matches("\\."))
+```
+
+```{r}
+#| label: data-proc
+labels = c(
+    "Highly Inclusive Jurisdictions: 0-2.9",
+    "Inclusive Jurisdictions: 3-4.9",
+    "At-Risk Jurisdictions: 5-9.9",
+    "Exclusionary Jurisdictions: 10-14.9",
+    "Extremely Exclusionary Jurisdictions: 15+")
+
+color = c("#00ff00", "#a6d96a", "#ffffbf", "#fdae61", "#ff0000")
+
+map_data <- mutate(map_data, `Home Value to Income Ratio Category` = factor(
+  `Home Value to Income Ratio Category`, levels = labels)
+)
+```
+
+### Home Values to Income
+
+```{r}
+library(mapgl)
+library(sf)
+
+# Assuming map_data is your sf object with the housing data
+# and color is your color palette
+
+# Initialize the map
+m <- mapboxgl(style = mapbox_style("streets"),
+              bounds = map_data)
+
+# Add the main layer
+m <- m |>
+  add_fill_layer(
+    id = "places",
+    source = map_data,
+    fill_color = match_expr(
+      column = "Home Value to Income Ratio Category",
+      values = levels(map_data$`Home Value to Income Ratio Category`),
+      stops = color
+    ),
+    fill_opacity = 0.7,
+    fill_outline_color = "black",
+    popup = "",
+    tooltip = "Home Value to Income Ratio Category"
+  )
+
+
+# Add other controls
+m <- m |>
+  add_navigation_control() |>
+  add_fullscreen_control() |>
+  add_scale_control() |>
+  add_geocoder_control()
+
+# Add legend
+m <- m |>
+  add_legend(
+    "Home Value to Income Ratio",
+    values = unique(map_data$`Home Value to Income Ratio Category`),
+    colors = color
+  )
+
+# Display the map
+m
+```
+
+```{r}
+popupCols <- grep("^[A-Z]", names(map_data), value = TRUE)
+factpal <- colorFactor(color, map_data$`Home Value to Income Ratio Category`)
+
+
+m <- leaflet(map_data, options = leafletOptions()) |>
+  # Base groups
+  addTiles(group = "OSM (default)") |>
+  addProviderTiles(providers$Stamen.Toner, group = "Toner") |>
+  addProviderTiles(providers$Stamen.TonerLite, group = "Toner Lite") |>
+  addProviderTiles(providers$Esri.WorldStreetMap, group = "Esri World Street Map") |>
+  addProviderTiles(providers$Esri.WorldImagery, group = "Esri World Imagery") |>
+  addProviderTiles(providers$CartoDB.Positron, group = "CartoDB Positron") |>
+  addProviderTiles(providers$CartoDB.DarkMatter, group = "CartoDB Dark Matter") |>
+  addProviderTiles(providers$OpenStreetMap.France, group = "OpenStreetMap France") |>
+  # Overlay groups
+  addPolygons(
+    fillColor = ~factpal(`Home Value to Income Ratio Category`),
+    color = "black",
+    weight = 0.5,
+    label = ~`Home Value to Income Ratio Category`,
+    popup = popupTable(map_data, feature.id = FALSE, row.numbers = FALSE, zcol = popupCols),
+    group = "Places",
+    options = pathOptions(attribution = "AEI Housing Center, U.S. Census Bureau")) |>
+  # Layers control
+  addLayersControl(
+    baseGroups = c("OSM (default)", "Toner", "Toner Lite", "Esri World Street Map", "Esri World Imagery", "CartoDB Positron", "CartoDB Dark Matter", "OpenStreetMap France"),
+    # overlayGroups = c("Quakes", "Outline"),
+    options = layersControlOptions()
+  )
+m
+
+```
+
+```{r}
+#| include: false
+#| eval: false
+htmlwidgets::saveWidget(m, "product/map_income_avm.html", selfcontained = FALSE)
+```
+
