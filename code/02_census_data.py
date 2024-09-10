@@ -23,7 +23,7 @@ b19013["cbsa_2020_id"] = b19013["geo_id"].str[-5:]
 
 cbsa_income = b19013[["cbsa_2020_id", "b19013_001e"]].copy()
 
-cbsa_income = cbsa_income.rename(columns={"B19013_001E": "median_income_2022",})
+cbsa_income = cbsa_income.rename(columns={"b19013_001e": "cbsa_income_2022"})
 
 cbsa_income.to_csv("data/tidy/cbsa_income_2022.csv", index=False)
 
@@ -32,6 +32,6 @@ b25077["place_2020_id"] = b25077["geo_id"].str[-7:]
 
 place_home_value = b25077[["place_2020_id", "b25077_001e"]].copy()
 
-place_home_value = place_home_value.rename(columns={"b25077_001e": "median_home_value_2022"})
+place_home_value = place_home_value.rename(columns={"b25077_001e": "place_home_value_census_2022"})
 
 place_home_value.to_csv("data/tidy/place_home_value_2022.csv", index=False)
