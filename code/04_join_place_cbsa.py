@@ -11,10 +11,6 @@ cbsa_income = pd.read_csv("data/tidy/cbsa_income_2022.csv", dtype={"cbsa_2020_id
 place_geo = gpd.read_parquet("data/tidy/us_place_2020.parquet")
 cbsa_geo = gpd.read_parquet("data/tidy/us_cbsa.parquet")
 
-# create centroid version of place geometry
-place_centroid = place_geo.copy()
-place_centroid["geometry"] = place_geo["geometry"].to_crs(3857).centroid.to_crs(4326)
-
 # join each place centroid to cbsa
 place_cbsa = gpd.sjoin(place_geo, cbsa_geo, how="left", predicate="intersects")
 place_cbsa = place_cbsa.drop_duplicates(subset="place_2020_id")
@@ -24,15 +20,6 @@ place_geo_data = place_geo.merge(
   place_cbsa[["place_2020_id", "cbsa_2020_id", "cbsa_name"]], 
   on="place_2020_id"
 )
-
-
-# losing SF on centroid join
-# SF = "0667000"
-# place_geo[place_geo["place_name"].str.contains("San Francisco")]
-# place_geo[place_geo["place_2020_id"] == "0667000"]
-# place_cbsa[place_cbsa["place_2020_id"] == "0667000"]
-# place_geo_data[place_geo_data["place_2020_id"] == "0667000"]
-# cbsa_geo[cbsa_geo["cbsa_name"].str.contains("San Francisco")]
 
 # add cbsa median income to each place
 place_geo_data = place_geo_data.merge(cbsa_income, on="cbsa_2020_id")
