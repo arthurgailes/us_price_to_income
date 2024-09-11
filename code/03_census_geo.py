@@ -18,7 +18,6 @@ cbsa = pygris.core_based_statistical_areas(cb=True)
 
 cbsa = cbsa.to_crs(4326)[["GEOID", "NAME", "geometry"]]\
   .rename(columns={"GEOID": "cbsa_2020_id", "NAME": "cbsa_name"})\
-  .query("cbsa_name.str.contains(', CA')")\
   .sort_values(by="cbsa_2020_id")
 
 us_place_2020.to_parquet("data/tidy/us_place_2020.parquet")
