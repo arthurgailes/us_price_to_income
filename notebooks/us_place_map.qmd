@@ -90,46 +90,15 @@ m <- m |>
   add_legend(
     "Home Value to Income Ratio",
     values = unique(map_data$`Home Value to Income Ratio Category`),
-    colors = color
+    colors = color,
+    type = "categorical"
   )
 
 # Display the map
 m
 ```
 
-```{r}
-popupCols <- grep("^[A-Z]", names(map_data), value = TRUE)
-factpal <- colorFactor(color, map_data$`Home Value to Income Ratio Category`)
 
-
-m <- leaflet(map_data, options = leafletOptions()) |>
-  # Base groups
-  addTiles(group = "OSM (default)") |>
-  addProviderTiles(providers$Stamen.Toner, group = "Toner") |>
-  addProviderTiles(providers$Stamen.TonerLite, group = "Toner Lite") |>
-  addProviderTiles(providers$Esri.WorldStreetMap, group = "Esri World Street Map") |>
-  addProviderTiles(providers$Esri.WorldImagery, group = "Esri World Imagery") |>
-  addProviderTiles(providers$CartoDB.Positron, group = "CartoDB Positron") |>
-  addProviderTiles(providers$CartoDB.DarkMatter, group = "CartoDB Dark Matter") |>
-  addProviderTiles(providers$OpenStreetMap.France, group = "OpenStreetMap France") |>
-  # Overlay groups
-  addPolygons(
-    fillColor = ~factpal(`Home Value to Income Ratio Category`),
-    color = "black",
-    weight = 0.5,
-    label = ~`Home Value to Income Ratio Category`,
-    popup = popupTable(map_data, feature.id = FALSE, row.numbers = FALSE, zcol = popupCols),
-    group = "Places",
-    options = pathOptions(attribution = "AEI Housing Center, U.S. Census Bureau")) |>
-  # Layers control
-  addLayersControl(
-    baseGroups = c("OSM (default)", "Toner", "Toner Lite", "Esri World Street Map", "Esri World Imagery", "CartoDB Positron", "CartoDB Dark Matter", "OpenStreetMap France"),
-    # overlayGroups = c("Quakes", "Outline"),
-    options = layersControlOptions()
-  )
-m
-
-```
 
 ```{r}
 #| include: false
