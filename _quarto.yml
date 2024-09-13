@@ -1,0 +1,4 @@
+project:
+  title: "United States Rent to Income Map"
+  type: website
+  output-dir: docs
