@@ -45,14 +45,6 @@ labels = [
       "Exclusionary Jurisdictions: 10-14.9",
       "Extremely Exclusionary Jurisdictions: 15+"]
 
-# color labels from green to red
-colors = [
-  "#00ff00", "#a6d96a", "#ffffbf", "#fdae61", "#ff0000"
-]
-
-# create a dictionary from labels to colors
-color_dict = dict(zip(labels, colors))
-color_dict
 
 # Format data for hover
 map_data_lab = place_geo_data.copy()
@@ -61,27 +53,45 @@ map_data_lab = map_data_lab[map_data_lab["avm_income_ratio"].notna()]
 
 map_data_lab["avm_income_ratio"] = round(map_data_lab["avm_income_ratio"], 1)
 
-map_data_lab["Home Value to Income Ratio Category"] = pd.cut(
+map_data_lab["avm_income_ratio_category"] = pd.cut(
     map_data_lab["avm_income_ratio"],
     bins=[0, 2.9, 4.9, 9.9, 14.9, np.inf],
     labels = labels).astype(str)
 
-# map_data_lab["home_inc_color"] = map_data_lab["Home Value to Income Ratio Category"].map(color_dict)
+map_data_lab["census_income_ratio_category"] = pd.cut(
+    map_data_lab["census_income_ratio"],
+    bins=[0, 2.9, 4.9, 9.9, 14.9, np.inf],
+    labels = labels).astype(str)
 
 # convert home value and income columns to dollars
-map_data_lab["place_median_avm_2023"] = map_data_lab["place_median_avm_2023"].apply(lambda x: "${:,.0f}".format(x))
-map_data_lab["cbsa_median_income_2022"] = map_data_lab["cbsa_median_income_2022"].apply(lambda x: "${:,.0f}".format(x))
+# map_data_lab["place_median_avm_2023"] = map_data_lab["place_median_avm_2023"].apply(lambda x: "${:,.0f}".format(x))
+# map_data_lab["place_home_value_census_2022"] = map_data_lab["place_home_value_census_2022"].apply(lambda x: "${:,.0f}".format(x))
+# map_data_lab["cbsa_median_income_2022"] = map_data_lab["cbsa_median_income_2022"].apply(lambda x: "${:,.0f}".format(x))
 
-# remove unnecessary ", CA" suffix from cbsa
-map_data_lab["cbsa_name"] = map_data_lab["cbsa_name"].str.replace(", CA", "")
 
-map_data_lab = map_data_lab.rename(columns={
-  "place": "Place",
-  "avm_income_ratio": "Home Value to Income Ratio",
-  "place_median_avm_2023": "Median Home Value (Single Family)",
-  "cbsa_median_income_2022": "Median Household Income (CBSA)",
-  "place_name": "Place Name",
-  "cbsa_name": "CBSA Name"})
+# Create a dictionary of column names and their descriptions
+data_dictionary = {
+    "place": "Place identifier",
+    "avm_income_ratio": "Home Value to Income Ratio",
+    "census_income_ratio": "Home Value to Income Ratio (ACS Home Values)",
+    "place_median_avm_2023": "Median Home Value",
+    "place_home_value_census_2022": "Median Home Value (ACS)",
+    "cbsa_median_income_2022": "Median Household Income (CBSA)",
+    "avm_income_ratio_category": "Home Value to Income Ratio Category",
+    "census_income_ratio_category": "Home Value to Income Ratio Category (ACS Home Values)",
+    "place_name": "Place Name",
+    "cbsa_name": "CBSA Name"
+}
+
+# Create a DataFrame from the data dictionary
+data_dict_df = pd.DataFrame.from_dict(data_dictionary, orient='index', columns=['Description'])
+
+# Reset the index and rename it to 'Column Name'
+data_dict_df = data_dict_df.reset_index().rename(columns={'index': 'Column Name'})
+
+# Save the data dictionary DataFrame as a CSV file
+data_dict_df.to_csv('data/tidy/data_dictionary.csv', index=False)
+
 
 # drop unnecessary columns
 map_data_lab = map_data_lab.drop(columns=["cbsa_2020_id", "place_2020_id"])
