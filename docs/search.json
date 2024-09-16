@@ -1,9 +1,0 @@
-[
-  {
-    "objectID": "notebooks/us_place_map.html",
-    "href": "notebooks/us_place_map.html",
-    "title": "Statewide rents-to-income ratio map",
-    "section": "",
-    "text": "Project Description: A statewide map comparing the median home price in every jurisdiction to metropolitan household income. Price to income ratios over 10 are considered exclusionary.\nSource: Incomes are derived from the 2022 5-year ACS. Home values are derived from 2023 Automated Valuation Models for individual properties, aggregated to the Census Place via AEI’s Walkable Oriented Development map. ACS Place home values are also included.\n\nHome Values to Income\n\n\n\n\nmaplibregl"
-  }
-]
