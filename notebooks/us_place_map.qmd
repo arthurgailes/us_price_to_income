@@ -15,24 +15,23 @@ editor:
   render-on-save: true
 ---
 
-Project Description: A statewide map comparing the median home price in every jurisdiction to metropolitan household income. Generally, three to five is considered to be a healthy rate---this interactive map will reveal potentially exclusionary jurisdictions.
+Project Description: A statewide map comparing the median home price in every jurisdiction to metropolitan household income. Price to income ratios over 10 are considered exclusionary.
+
+Source: Incomes are derived from the 2022 5-year ACS. Home values are derived from 2023 Automated Valuation Models for individual properties, aggregated to the Census Place via AEI's Walkable Oriented Development map. ACS Place home values are also included.
 
 
 ```{r setup}
 #| include: false
-pacman::p_load(sf, dplyr, leaflet, leafpop, here, mapgl)
-setwd(here())
+pacman::p_load(sf, dplyr, glue, scales, here, mapgl)
+if (interactive()) setwd(here())
 knitr::opts_knit$set(root.dir = here())
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
 ```
 
 ```{r}
-map_data <- st_read("data/tidy/map_data_income_avm.geojson", quiet = TRUE) |>
-  rename_with( ~gsub("\\.", " ", .x), matches("\\."))
-```
+map_data_init <- st_read("data/tidy/map_data_income_avm.geojson", quiet = TRUE)
 
-```{r}
 #| label: data-proc
 labels = c(
     "Highly Inclusive Jurisdictions: 0-2.9",
@@ -43,23 +42,29 @@ labels = c(
 
 color = c("#00ff00", "#a6d96a", "#ffffbf", "#fdae61", "#ff0000")
 
-map_data <- mutate(map_data, `Home Value to Income Ratio Category` = factor(
-  `Home Value to Income Ratio Category`, levels = labels)
+map_data <- mutate(
+  map_data_init, 
+  across(matches("202[23]$"), dollar),
+  avm_income_ratio_category = factor(avm_income_ratio_category, levels = labels),
+  tooltip = glue(
+    "Price to Income Ratio: {avm_income_ratio}",
+    "CBSA Income (CBSA, 2022 Median): {cbsa_median_income_2022}",
+    "Home Value (AVM, Place Median): {place_median_avm_2023}",
+    "Home Value (Census, Place Median): {place_home_value_census_2022 }",
+    "Place:{place_name}",
+    "CBSA: {cbsa_name} ",
+    .sep = "<br>"
+  )
 )
 ```
+
 
 ### Home Values to Income
 
 ```{r}
-library(mapgl)
-library(sf)
 
-# Assuming map_data is your sf object with the housing data
-# and color is your color palette
-
-# Initialize the map
-m <- mapboxgl(style = mapbox_style("streets"),
-              bounds = map_data)
+# m <- mapboxgl(style = mapbox_style("streets"), bounds = map_data)
+m <- maplibre(bounds = map_data)
 
 # Add the main layer
 m <- m |>
@@ -67,14 +72,14 @@ m <- m |>
     id = "places",
     source = map_data,
     fill_color = match_expr(
-      column = "Home Value to Income Ratio Category",
-      values = levels(map_data$`Home Value to Income Ratio Category`),
+      column = "avm_income_ratio_category",
+      values = levels(map_data$avm_income_ratio_category),
       stops = color
     ),
     fill_opacity = 0.7,
     fill_outline_color = "black",
-    popup = "",
-    tooltip = "Home Value to Income Ratio Category"
+    popup = "tooltip",
+    tooltip = "place_name"
   )
 
 
@@ -88,21 +93,24 @@ m <- m |>
 # Add legend
 m <- m |>
   add_legend(
-    "Home Value to Income Ratio",
-    values = unique(map_data$`Home Value to Income Ratio Category`),
+    "Home Value to Income Ratio<br>AVM Data",
+    values = unique(map_data$avm_income_ratio_category),
     colors = color,
     type = "categorical"
   )
 
-# Display the map
-m
+
 ```
 
+```{r, results='asis'}
+# Save the map as a page.
+temp_file <- "product/map_income_avm.html"
+htmlwidgets::saveWidget(m, temp_file, selfcontained = TRUE)
 
+# Display the map
+map_html <- paste(readLines(temp_file), collapse = "\n")
+map_html <- gsub("<!DOCTYPE html>", "", map_html, fixed = TRUE)
 
-```{r}
-#| include: false
-#| eval: false
-htmlwidgets::saveWidget(m, "product/map_income_avm.html", selfcontained = FALSE)
+cat(map_html)
 ```
 
