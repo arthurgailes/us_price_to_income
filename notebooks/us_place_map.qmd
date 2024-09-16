@@ -1,5 +1,5 @@
 ---
-title: "Statewide rents-to-income ratio map"
+title: "Home price to income map"
 author: "Arthur Gailes"
 date: "`r Sys.Date()`"
 format:
@@ -15,9 +15,9 @@ editor:
   render-on-save: true
 ---
 
-Project Description: A statewide map comparing the median home price in every jurisdiction to metropolitan household income. Price to income ratios over 10 are considered exclusionary.
+Project Description: A national map comparing the median home price in every jurisdiction to metropolitan household income. Price to income ratios over 10 are considered exclusionary.
 
-Source: Incomes are derived from the 2022 5-year ACS. Home values are derived from 2023 Automated Valuation Models for individual properties, aggregated to the Census Place via AEI's Walkable Oriented Development map. ACS Place home values are also included.
+Source: [GitHub](https://github.com/arthurgailes/us_price_to_income)
 
 
 ```{r setup}
@@ -48,9 +48,8 @@ map_data <- mutate(
   avm_income_ratio_category = factor(avm_income_ratio_category, levels = labels),
   tooltip = glue(
     "Price to Income Ratio: {avm_income_ratio}",
-    "CBSA Income (CBSA, 2022 Median): {cbsa_median_income_2022}",
-    "Home Value (AVM, Place Median): {place_median_avm_2023}",
-    "Home Value (Census, Place Median): {place_home_value_census_2022 }",
+    "Home Value (2023 Place Median): {place_median_avm_2023}",
+    "Household Income (CBSA, 2022 Median): {cbsa_median_income_2022}",
     "Place:{place_name}",
     "CBSA: {cbsa_name} ",
     .sep = "<br>"
