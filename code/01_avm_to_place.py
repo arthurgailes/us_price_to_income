@@ -1,9 +1,10 @@
 """
 Convert AEI AVM data to place from block (2020 geo)
 
+Manual step required:
 
-Block-Place crosswalk source: https://mcdc.missouri.edu/applications/geocorr2022.html
-* Note: this only allows for downloading 13 states at a time, necessitating the
+* Download Block-Place crosswalk from https://mcdc.missouri.edu/applications/geocorr2022.html
+  * Note: this only allows for downloading 13 states at a time, necessitating the
   concatenation below.
 
 
