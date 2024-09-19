@@ -19,6 +19,9 @@ Project Description: A national map comparing the median home price in every jur
 
 Source: [GitHub](https://github.com/arthurgailes/us_price_to_income)
 
+<!-- Note: the render moves the html doc to ../docs, and that seems to take 
+another 5 min after rendering. -->
+
 
 ```{r setup}
 #| include: false
