@@ -39,11 +39,11 @@ place_data.to_csv("data/tidy/map_data_income_avm_raw.csv", index=False)
 
 
 labels = [
-      "Highly Inclusive Jurisdictions: 0-2.9",
-      "Inclusive Jurisdictions: 3-4.9",
-      "At-Risk Jurisdictions: 5-9.9",
-      "Exclusionary Jurisdictions: 10-14.9",
-      "Extremely Exclusionary Jurisdictions: 15+"]
+      "Highly Inclusive: 0-2.9",
+      "Inclusive: 3-4.9",
+      "At-Risk: 5-9.9",
+      "Exclusionary: 10-14.9",
+      "Extremely Exclusionary: 15+"]
 
 
 # Format data for hover
