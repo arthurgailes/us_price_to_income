@@ -37,11 +37,11 @@ map_data_init <- st_read("data/tidy/map_data_income_avm.geojson", quiet = TRUE)
 
 #| label: data-proc
 labels = c(
-    "Highly Inclusive Jurisdictions: 0-2.9",
-    "Inclusive Jurisdictions: 3-4.9",
-    "At-Risk Jurisdictions: 5-9.9",
-    "Exclusionary Jurisdictions: 10-14.9",
-    "Extremely Exclusionary Jurisdictions: 15+")
+    "Highly Inclusive: 0-2.9",
+    "Inclusive: 3-4.9",
+    "At-Risk: 5-9.9",
+    "Exclusionary: 10-14.9",
+    "Extremely Exclusionary: 15+")
 
 color = c("#00ff00", "#a6d96a", "#ffffbf", "#fdae61", "#ff0000")
 
@@ -55,6 +55,7 @@ map_data <- mutate(
     "Household Income (CBSA, 2022 Median): {cbsa_median_income_2022}",
     "Place:{place_name}",
     "CBSA: {cbsa_name} ",
+    "Source: AEI, First American, US Census",
     .sep = "<br>"
   )
 )
@@ -95,7 +96,10 @@ m <- m |>
 # Add legend
 m <- m |>
   add_legend(
-    "Home Value to Income Ratio<br>AVM Data",
+    "<div style='text-align: center;'>Home Value to Income Ratio
+    <br>Cities and CDPs<br>
+    <span style='font-size: 10pt; font-style: italic;'>Click a city to expand</span>
+    </div>",
     values = unique(map_data$avm_income_ratio_category),
     colors = color,
     type = "categorical"
