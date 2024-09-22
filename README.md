@@ -20,7 +20,11 @@ Data dictionary: `data\tidy\data_dictionary.csv`
     * Note: In this context, "single-family" includes detached and attached homes, as well as condominiums.
 * Household income: Estimated at the Core-Based Statistical Area (CBSA), i.e. Metroplolitan and Micropolitan Statistical Areas.
     * Source: American Community Survey 2022 5-year estimates
-    * Note: ACS home value estimates are also provided in the dataset for reference. The AVM is preferred because it is more recent, represents a complete census of properties, and because the ACS estimates are capped at $2 million, which is inappropriate for many jurisdictions. 
+    * Note: ACS home value estimates are also provided in the dataset for reference. The AVM is preferred for the following reasons:
+        * it is more recent
+        * it represents a complete census of properties
+        * the ACS estimates are capped at $2 million, which is inappropriate for many jurisdictions
+
 
 
 ### Python environment
