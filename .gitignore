@@ -4,7 +4,8 @@
 .Ruserdata
 /.quarto/
 /venv
-/product/
+product/*
+!product/map_income_avm.html
 data/raw/*
 data/intermed/*
 data/tidy/*
