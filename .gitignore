@@ -2,7 +2,10 @@
 .Rhistory
 .RData
 .Ruserdata
-data/*
 /.quarto/
 /venv
 /product/
+data/raw/*
+data/intermed/*
+data/tidy/*
+!data/tidy/.gitignore
