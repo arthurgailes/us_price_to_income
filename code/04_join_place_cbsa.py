@@ -71,7 +71,7 @@ map_data_lab["census_income_ratio_category"] = pd.cut(
 
 # Create a dictionary of column names and their descriptions
 data_dictionary = {
-    "place": "Place identifier",
+    "place_2020_id": "Place identifier",
     "avm_income_ratio": "Home Value to Income Ratio",
     "census_income_ratio": "Home Value to Income Ratio (ACS Home Values)",
     "place_median_avm_2023": "Median Home Value",
@@ -91,10 +91,6 @@ data_dict_df = data_dict_df.reset_index().rename(columns={'index': 'Column Name'
 
 # Save the data dictionary DataFrame as a CSV file
 data_dict_df.to_csv('data/tidy/data_dictionary.csv', index=False)
-
-
-# drop unnecessary columns
-map_data_lab = map_data_lab.drop(columns=["cbsa_2020_id", "place_2020_id"])
 
 map_data_lab.to_file("data/tidy/map_data_income_avm.geojson")
 map_data_lab.to_file("data/tidy/map_data_income_avm/map_data_income_avm.shp", driver = "ESRI Shapefile")
