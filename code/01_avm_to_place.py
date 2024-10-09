@@ -60,6 +60,8 @@ xwalk_block_place = xwalk_block_place.drop_duplicates(subset=["block_2020"])
 
 xwalk_block_place["place_2020_id"] = xwalk_block_place["state"] + xwalk_block_place["place"]
 
+xwalk_block_place = xwalk_block_place[xwalk_block_place['state'] != 72]
+
 xwalk_clean = xwalk_block_place[["block_2020", "place_2020_id", "PlaceName","stab"]].copy()
 
 us_block_data.rename(columns={"p50_avm_202312": "avm_2023"}, inplace=True)
@@ -82,3 +84,25 @@ assert us_place_avm['place_2020_id'].duplicated().sum() == 0, "Duplicate place_2
 us_place_avm.dropna(inplace=True)
 
 us_place_avm.to_csv("data/tidy/us_place_avm.csv", index=False, quoting=csv.QUOTE_NONNUMERIC)
+
+# save tract AVMs for reference
+us_tract_avm = (
+  us_block_data
+    .assign(tract_2020_id=us_block_data['block_2020'].str[:11])
+    .groupby('tract_2020_id')['avm_2023'] 
+    .median() 
+    .round()
+    .reset_index()
+)
+
+us_tract_avm.to_csv("data/tidy/us_tract_avm.csv", index=False, quoting=csv.QUOTE_NONNUMERIC)
+
+# testing
+result = us_tract_avm.tract_2020_id.str[:2].value_counts().sort_index()
+assert len(result) == 51, f"Expected length 51, but got {len(result)}"
+
+result = us_place_avm.place_2020_id.str[:2].value_counts().sort_index()
+assert len(result) == 51, f"Expected length 51, but got {len(result)}"
+
+med_avm = us_place_avm.avm_2023.median()
+assert med_avm > 200000
