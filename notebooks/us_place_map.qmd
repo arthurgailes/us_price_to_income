@@ -35,6 +35,8 @@ knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 ```{r}
 map_data_init <- st_read("data/tidy/map_data_income_avm.geojson", quiet = TRUE)
 
+  
+
 #| label: data-proc
 labels = c(
     "Highly Inclusive: 0-2.9",
