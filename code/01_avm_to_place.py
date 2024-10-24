@@ -12,7 +12,7 @@ To repeat, just download, unzip in data/raw and run this script.
 """
 
 import pandas as pd
-import geopandas as gpd
+import numpy as np
 import requests
 import zipfile
 import io
@@ -28,7 +28,7 @@ zip_file.extractall("data/raw")
 # load data
 us_block_data = pd.read_csv(
   "data/raw/datablock_20240508.csv", 
-  usecols=["block_2020", "p50_avm_202312"],
+  usecols=["block_2020", "p50_avm_202312", "avg_annual_hpa_2012_2024"],
   dtype={"block_2020": str}
 )
 
@@ -60,7 +60,7 @@ xwalk_block_place = xwalk_block_place.drop_duplicates(subset=["block_2020"])
 
 xwalk_block_place["place_2020_id"] = xwalk_block_place["state"] + xwalk_block_place["place"]
 
-xwalk_block_place = xwalk_block_place[xwalk_block_place['state'] != 72]
+# xwalk_block_place = xwalk_block_place[xwalk_block_place['state'] != 72]
 
 xwalk_clean = xwalk_block_place[["block_2020", "place_2020_id", "PlaceName","stab"]].copy()
 
@@ -75,7 +75,15 @@ xwalk_clean.to_parquet("data/intermed/xwalk_block_place.parquet", index=False)
 ## Collapse to place
 
 # get median avms
-us_place_avm = us_block_data_place.groupby(["place_2020_id", "PlaceName", "stab"])["avm_2023"].median().reset_index()
+us_place_avm = (
+  us_block_data_place
+    .groupby(["place_2020_id", "PlaceName", "stab"])
+    .agg({
+        'avm_2023': lambda x: np.nanmedian(x).round(),
+        'avg_annual_hpa_2012_2024': 'median'
+    })
+    .reset_index()
+)
 
 # Assert that place_2020_id isn't duplicated
 assert us_place_avm['place_2020_id'].duplicated().sum() == 0, "Duplicate place_2020_id found in the result"
@@ -89,9 +97,10 @@ us_place_avm.to_csv("data/tidy/us_place_avm.csv", index=False, quoting=csv.QUOTE
 us_tract_avm = (
   us_block_data
     .assign(tract_2020_id=us_block_data['block_2020'].str[:11])
-    .groupby('tract_2020_id')['avm_2023'] 
-    .median() 
-    .round()
+    .groupby('tract_2020_id').agg({
+        'avm_2023': lambda x: np.nanmedian(x).round(),
+        'avg_annual_hpa_2012_2024': 'median'
+    })
     .reset_index()
 )
 

@@ -2,10 +2,11 @@ Column Name,Description
 place_2020_id,Place identifier
 avm_income_ratio,Home Value to Income Ratio
 census_income_ratio,Home Value to Income Ratio (ACS Home Values)
-place_median_avm_2023,Median Home Value
+avm_2023,Median Home Value
 place_home_value_census_2022,Median Home Value (ACS)
-cbsa_median_income_2022,Median Household Income (CBSA)
+cbsa_income_2022,Median Household Income (CBSA)
 avm_income_ratio_category,Home Value to Income Ratio Category
 census_income_ratio_category,Home Value to Income Ratio Category (ACS Home Values)
+hpa_2012_2024,Average Annual Home Price Appreciation (2012-2024)
 place_name,Place Name
 cbsa_name,CBSA Name

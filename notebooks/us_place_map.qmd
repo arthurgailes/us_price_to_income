@@ -53,8 +53,8 @@ map_data <- mutate(
   avm_income_ratio_category = factor(avm_income_ratio_category, levels = labels),
   tooltip = glue(
     "Price to Income Ratio: {avm_income_ratio}",
-    "Home Value (2023 Place Median): {place_median_avm_2023}",
-    "Household Income (CBSA, 2022 Median): {cbsa_median_income_2022}",
+    "Home Value (2023 Place Median): {avm_2023}",
+    "Household Income (CBSA, 2022 Median): {cbsa_income_2022}",
     "Place:{place_name}",
     "CBSA: {cbsa_name} ",
     "Source: AEI, First American, US Census",
