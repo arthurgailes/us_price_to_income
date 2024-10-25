@@ -3,6 +3,7 @@
 import pandas as pd
 import geopandas as gpd
 import numpy as np
+import shutil
 
 place_avm = pd.read_csv("data/tidy/us_place_avm.csv", dtype={"place_2020_id": str})
 place_value = pd.read_csv(
@@ -122,10 +123,16 @@ data_dict_df.to_csv("data/tidy/data_dictionary.csv", index=False)
 
 map_data_lab.to_file("data/tidy/map_data_income_avm.geojson")
 map_data_lab.to_file(
-    "data/tidy/map_data_income_avm/map_data_income_avm.shp", driver="ESRI Shapefile"
+    "data/tidy/map_data_income_avm/map_data_income_avm.shp",
+    driver="ESRI Shapefile",
+)
+shutil.make_archive(
+    "data/tidy/map_data_income_avm.shp", "zip", "data/tidy/map_data_income_avm"
 )
 
 # tests
+assert len(map_data_lab) > 3e4, "expect gt 20k places"
+
 assert (
     "hpa_2012_2024" in map_data_lab.columns
 ), "Column 'hpa_2012_2024' is missing from map_data_lab"
