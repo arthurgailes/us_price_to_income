@@ -12,11 +12,16 @@ place_value = pd.read_csv(
 cbsa_income = pd.read_csv("data/tidy/cbsa_income_2022.csv", dtype={"cbsa_2020_id": str})
 
 place_geo = gpd.read_parquet("data/tidy/us_place_2020.parquet")
+
 cbsa_geo = gpd.read_parquet("data/tidy/us_cbsa.parquet")
 
-# join each place centroid to cbsa
-place_cbsa = gpd.sjoin(place_geo, cbsa_geo, how="left", predicate="intersects")
-place_cbsa = place_cbsa.drop_duplicates(subset="place_2020_id")
+# join each place to cbsa and keep the largest intersection
+place_cbsa = gpd.overlay(place_geo, cbsa_geo, how="intersection")
+place_cbsa["intersection_area"] = place_cbsa.geometry.area
+place_cbsa = place_cbsa.sort_values(
+    "intersection_area", ascending=False
+).drop_duplicates(subset="place_2020_id")
+
 
 # join cbsa code to each place
 place_geo_data = place_geo.merge(
@@ -131,7 +136,7 @@ shutil.make_archive(
 )
 
 # tests
-assert len(map_data_lab) > 3e4, "expect gt 20k places"
+assert len(map_data_lab) > 2e4, "expect gt 20k places"
 
 assert (
     "hpa_2012_2024" in map_data_lab.columns
@@ -181,3 +186,10 @@ for field in key_fields:
 assert "geometry" in map_data_lab.columns, "Geometry column is missing"
 assert not map_data_lab.geometry.isna().all(), "All geometry values are null"
 assert map_data_lab.geometry.is_valid.all(), "Invalid geometries found"
+
+assert (
+    map_data_lab.cbsa_name[
+        map_data_lab.place_name == "Lexington-Fayette urban county"
+    ].iloc[0]
+    == "Lexington-Fayette, KY"
+)
