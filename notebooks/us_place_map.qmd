@@ -19,13 +19,13 @@ Project Description: A national map comparing the median home price in every jur
 
 Source: [GitHub](https://github.com/arthurgailes/us_price_to_income)
 
-<!-- Note: the render moves the html doc to ../docs, and that seems to take 
+<!-- Note: the render moves the html doc to ../docs, and that seems to take
 another 5 min after rendering. -->
 
 
 ```{r setup}
 #| include: false
-pacman::p_load(sf, dplyr, glue, scales, here, mapgl)
+pacman::p_load(sf, dplyr, glue, scales, here, mapgl, arrow)
 if (interactive()) setwd(here())
 knitr::opts_knit$set(root.dir = here())
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
@@ -35,33 +35,48 @@ knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 ```{r}
 map_data_init <- st_read("data/tidy/map_data_income_avm.geojson", quiet = TRUE)
 
-  
-
 #| label: data-proc
-labels = c(
-    "Highly Inclusive: 0-2.9",
-    "Inclusive: 3-4.9",
-    "At-Risk: 5-9.9",
-    "Exclusionary: 10-14.9",
-    "Extremely Exclusionary: 15+")
-
-color = c("#00ff00", "#a6d96a", "#ffffbf", "#fdae61", "#ff0000")
-
-map_data <- mutate(
-  map_data_init, 
-  across(matches("202[23]$"), dollar),
-  avm_income_ratio_category = factor(avm_income_ratio_category, levels = labels),
-  tooltip = glue(
-    "Price to Income Ratio: {avm_income_ratio}",
-    "Home Value (2023 Place Median): {avm_2023}",
-    "Household Income (CBSA, 2022 Median): {cbsa_income_2022}",
-    "Place:{place_name}",
-    "CBSA: {cbsa_name} ",
-    "Source: AEI, First American, US Census",
-    .sep = "<br>"
-  )
+labels <- c(
+  "Highly Inclusive: 0-2.9",
+  "Inclusive: 3-4.9",
+  "At-Risk: 5-9.9",
+  "Exclusionary: 10-14.9",
+  "Extremely Exclusionary: 15+"
 )
+
+color <- c("#00ff00", "#a6d96a", "#ffffbf", "#fdae61", "#ff0000")
+
+map_data <- map_data_init |>
+  filter(avm_income_ratio_category != "No Data") |>
+  mutate(
+    across(matches("202[23]$"), dollar),
+    avm_income_ratio_category = factor(avm_income_ratio_category, levels = labels),
+    tooltip = glue(
+      "Price to Income Ratio: {avm_income_ratio}",
+      "Home Value (2023 Place Median): {avm_2023}",
+      "Household Income (CBSA, 2022 Median): {cbsa_income_2022}",
+      "Place:{place_name}",
+      "CBSA: {cbsa_name} ",
+      "Source: AEI, First American, US Census",
+      .sep = "<br>"
+    )
+  )
 ```
+
+```{r}
+# CBSA boundaries
+sf_use_s2(FALSE)
+
+place_outlines <- st_union(map_data)
+
+cbsa <- read_parquet("data/tidy/us_cbsa.parquet") |> 
+  mutate(geometry = st_as_sfc(geometry, crs = 4326)) |> 
+  st_sf() |> 
+  st_filter(place_outlines) |> 
+  st_difference(place_outlines)
+
+```
+
 
 
 ### Home Values to Income
@@ -73,6 +88,13 @@ m <- maplibre(bounds = map_data)
 
 # Add the main layer
 m <- m |>
+  add_fill_layer(
+    id = "cbsa",
+    source = cbsa,
+    fill_color = "transparent",
+    fill_outline_color = "darkgray",
+    tooltip = "cbsa_name"
+  ) |>
   add_fill_layer(
     id = "places",
     source = map_data,
@@ -106,7 +128,7 @@ m <- m |>
     colors = color,
     type = "categorical"
   )
-
+m
 
 ```
 
