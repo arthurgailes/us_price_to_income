@@ -63,19 +63,7 @@ map_data <- map_data_init |>
   )
 ```
 
-```{r}
-# CBSA boundaries
-sf_use_s2(FALSE)
 
-place_outlines <- st_union(map_data)
-
-cbsa <- read_parquet("data/tidy/us_cbsa.parquet") |> 
-  mutate(geometry = st_as_sfc(geometry, crs = 4326)) |> 
-  st_sf() |> 
-  st_filter(place_outlines) |> 
-  st_difference(place_outlines)
-
-```
 
 
 
@@ -89,13 +77,6 @@ m <- maplibre(bounds = map_data)
 # Add the main layer
 m <- m |>
   add_fill_layer(
-    id = "cbsa",
-    source = cbsa,
-    fill_color = "transparent",
-    fill_outline_color = "darkgray",
-    tooltip = "cbsa_name"
-  ) |>
-  add_fill_layer(
     id = "places",
     source = map_data,
     fill_color = match_expr(
@@ -103,6 +84,7 @@ m <- m |>
       values = levels(map_data$avm_income_ratio_category),
       stops = color
     ),
+    before_id = "water",
     fill_opacity = 0.7,
     fill_outline_color = "black",
     popup = "tooltip",
@@ -128,8 +110,33 @@ m <- m |>
     colors = color,
     type = "categorical"
   )
-m
 
+```
+
+
+```{r, eval=FALSE, include=FALSE}
+# view with CBSAs; makes map too large on publish
+# CBSA boundaries
+sf_use_s2(FALSE)
+
+place_outlines <- st_union(map_data)
+
+cbsa <- read_parquet("data/tidy/us_cbsa.parquet") |> 
+  mutate(geometry = st_as_sfc(geometry, crs = 4326)) |> 
+  st_sf() |> 
+  st_filter(place_outlines) |> 
+  st_difference(place_outlines)
+
+m <- m |>
+  add_fill_layer(
+    id = "cbsa",
+    source = cbsa,
+    fill_color = "transparent",
+    fill_outline_color = "darkgray",
+    tooltip = "cbsa_name"
+  )
+
+m
 ```
 
 ```{r, results='asis'}
