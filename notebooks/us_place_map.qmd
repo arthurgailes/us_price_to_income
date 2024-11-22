@@ -121,10 +121,10 @@ sf_use_s2(FALSE)
 
 place_outlines <- st_union(map_data)
 
-cbsa <- read_parquet("data/tidy/us_cbsa.parquet") |> 
-  mutate(geometry = st_as_sfc(geometry, crs = 4326)) |> 
-  st_sf() |> 
-  st_filter(place_outlines) |> 
+cbsa <- read_parquet("data/tidy/us_cbsa.parquet") |>
+  mutate(geometry = st_as_sfc(geometry, crs = 4326)) |>
+  st_sf() |>
+  st_filter(place_outlines) |>
   st_difference(place_outlines)
 
 m <- m |>
@@ -139,7 +139,7 @@ m <- m |>
 m
 ```
 
-```{r, results='asis'}
+```{r print, results='asis'}
 # Save the map as a page.
 temp_file <- "product/map_income_avm.html"
 htmlwidgets::saveWidget(m, temp_file, selfcontained = TRUE)

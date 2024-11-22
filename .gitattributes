@@ -1,3 +1,4 @@
 data/tidy/**
 product/**
 docs/notebooks/us_place_map.html
+*freeze/notebooks/us*place_map/execute-results/html.json filter=lfs diff=lfs merge=lfs -text
