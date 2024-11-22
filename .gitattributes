@@ -2,3 +2,6 @@ data/tidy/**
 product/**
 docs/notebooks/us_place_map.html
 *freeze/notebooks/us*place_map/execute-results/html.json filter=lfs diff=lfs merge=lfs -text
+data/tidy/map_data_income_avm.geojson filter=lfs diff=lfs merge=lfs -text
+product/map_income_avm.html filter=lfs diff=lfs merge=lfs -text
+docs/notebooks/us_place_map.html filter=lfs diff=lfs merge=lfs -text
